@@ -3,6 +3,7 @@ from ursina.prefabs.first_person_controller import FirstPersonController
 from ursina import *
 from utils.constants import weapons, max_enemy_speed
 from ursina.shaders import lit_with_shadows_shader
+from utils.preload import death_sound
 import json
 
 class Player(FirstPersonController):
@@ -76,6 +77,8 @@ class Player(FirstPersonController):
                     destroy(mouse.hovered_entity.health_bar)
                     destroy(mouse.hovered_entity.path_line)
                     destroy(mouse.hovered_entity)
+
+                    death_sound.play()
 
                     self.summon_enemy()
 
