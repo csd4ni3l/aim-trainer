@@ -1,0 +1,12 @@
+Thanks to OpenGameArt and:
+    Kay Lousberg for the 2d Guns assets: https://opengameart.org/content/2d-guns
+    2D_Platformerguy for the music: https://opengameart.org/content/electronic-music-chiptune-3
+
+Huge Thanks to Python for being the programming language used in this game.
+https://www.python.org/
+
+Huge thanks to Ursina Engine for being the graphical engine for this game.
+https://www.ursinaengine.org/
+
+Thanks to the following other libraries used in this game:
+pypresence - https://github.com/qwertyquerty/pypresence - Used for Discord Rich Presence

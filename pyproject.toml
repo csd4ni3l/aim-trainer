@@ -1,0 +1,10 @@
+[project]
+name = "aimtrainer"
+version = "0.1.0"
+description = "An aim trainer made in Ursina engine."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pypresence>=4.3.0",
+    "ursina>=7.0.0",
+]
