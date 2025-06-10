@@ -43,7 +43,7 @@ class Game():
 
     def summon_enemy(self):
         if not len(self.enemies) >= 50:
-            self.enemies.append(Enemy(self.player, self.shootables_parent, self.player.x + (random.randint(12, 24) * random.choice([1, -1])), random.randint(min_enemy_y, max_enemy_y), self.player.z + (random.randint(12, 24) * random.choice([1, -1])), "assets/graphics/enemy/" + random.choice(file_names)))
+            self.enemies.append(Enemy(self.player, self.shootables_parent, self.player.x + (random.randint(12, 24) * random.choice([1, -1])), random.randint(min_enemy_y, max_enemy_y), self.player.z + (random.randint(12, 24) * random.choice([1, -1])), "assets/graphics/enemy/" + random.choice(enemy_file_names)))
 
     def update(self):
         Sky.update(self.sky)
