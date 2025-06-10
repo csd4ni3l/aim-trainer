@@ -1,31 +1,23 @@
 from ursina import Entity, Quad, color, camera, held_keys, destroy
 
 class Inventory():
-    def __init__(self, x=0, y=4.5, width=1.2, height=0.1, slots=5):
-        self.width = width
-        self.height = height
+    def __init__(self, x=0, y=4.5, slot_width=0.1, slot_height=0.1, slots=5):
         self.x = x
         self.y = y
         self.slot_number = slots
-        self.slot_width = width / self.slot_number
+        self.slot_width = slot_width
+        self.slot_height = slot_height
 
         self.slot_grid = {}
-        self.item_grid = {}
         self.slot_names = {}
 
         self.current_slot = 0
 
-        self.create_grid()
-
-        self.slot_grid[0].input = self.input
-
     def switch_to(self, slot):
-        self.item_grid[self.current_slot].color = color.gray
         self.slot_grid[self.current_slot].color = color.gray
 
         self.current_slot = slot
 
-        self.item_grid[slot].color = color.white
         self.slot_grid[slot].color = color.white
 
     def input(self, key):
@@ -37,35 +29,22 @@ class Inventory():
         elif key == "scroll up":
             self.switch_to(max(0, self.current_slot - 1))
 
-    def create_grid(self):
-        for slot in range(self.slot_number):
-            self.slot_grid[slot] = Entity(
-                parent = camera.ui,
-                model = Quad(radius=.015),
-                texture = 'white_cube',
-                scale = (self.slot_width, self.height),
-                origin = (-slot * (self.slot_width * 7), 0),
-                position = (-.7, -.4),
-                color = color.gray if slot != self.current_slot else color.white
-            )
-
     def append(self, item, name, slot):
         self.slot_names[slot] = name
 
-        self.item_grid[slot] = Entity(
+        self.slot_grid[slot] = Entity(
             parent = camera.ui,
             model = Quad(radius=.015),
             texture = item,
-            scale = (self.slot_width, self.height),
-            origin = (-slot * (self.slot_width * 7), 0),
-            position = (-.7, -.4),
+            scale = (self.slot_width, self.slot_height),
+            position = (-.3 + slot * (self.slot_width * 1.25), -.4),
             z=-1,
             color = color.gray if slot != self.current_slot else color.white
         )
 
-    def hide(self):
-        for item_entity in self.item_grid.values():
-            destroy(item_entity)
+        if slot == 0:
+            self.slot_grid[slot].input = self.input
 
+    def hide(self):
         for slot_entity in self.slot_grid.values():
             destroy(slot_entity)
