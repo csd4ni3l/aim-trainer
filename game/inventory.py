@@ -1,7 +1,7 @@
 from ursina import Entity, Quad, color, camera, held_keys, destroy
 
 class Inventory():
-    def __init__(self, x=0, y=4.5, width=12, height=1, slots=5):
+    def __init__(self, x=0, y=4.5, width=1.2, height=0.1, slots=5):
         self.width = width
         self.height = height
         self.x = x
@@ -32,9 +32,9 @@ class Inventory():
         if key.isnumeric() and int(key) <= self.slot_number:
             self.switch_to(int(key) - 1)
 
-        if key == "scroll up":
+        if key == "scroll down":
             self.switch_to(min(self.slot_number - 1, self.current_slot + 1))
-        elif key == "scroll down":
+        elif key == "scroll up":
             self.switch_to(max(0, self.current_slot - 1))
 
     def create_grid(self):
@@ -43,9 +43,9 @@ class Inventory():
                 parent = camera.ui,
                 model = Quad(radius=.015),
                 texture = 'white_cube',
-                scale = (self.slot_width * 0.1, self.height * 0.1),
-                origin = (-slot * (self.slot_width / 2), 0),
-                position = (-.55, -.4),
+                scale = (self.slot_width, self.height),
+                origin = (-slot * (self.slot_width * 7), 0),
+                position = (-.7, -.4),
                 color = color.gray if slot != self.current_slot else color.white
             )
 
@@ -56,9 +56,9 @@ class Inventory():
             parent = camera.ui,
             model = Quad(radius=.015),
             texture = item,
-            scale = (self.slot_width * 0.1, self.height * 0.1),
-            origin = (-slot * (self.slot_width / 2), 0),
-            position = (-.55, -.4),
+            scale = (self.slot_width, self.height),
+            origin = (-slot * (self.slot_width * 7), 0),
+            position = (-.7, -.4),
             z=-1,
             color = color.gray if slot != self.current_slot else color.white
         )

@@ -9,6 +9,7 @@ enemy_health = 100
 weapons = {
     "assault_rifle": {"dmg": 20, "atk_speed": 0.2, "image": "assets/graphics/assaultrifle.png"},
     "smg": {"dmg": 10, "atk_speed": 0.1, "image": "assets/graphics/smg.png"},
+    "minigun": {"dmg": 2, "atk_speed": 0.02, "image": "assets/graphics/minigun.png"},
     "pistol": {"dmg": 100 / 3, "atk_speed": 1 / 3, "image": "assets/graphics/pistol.png"},
     "revolver": {"dmg": 50, "atk_speed": 1 / 2, "image": "assets/graphics/revolver.png"},
     "sniper": {"dmg": 100, "atk_speed": 1, "image": "assets/graphics/sniper.png"},
