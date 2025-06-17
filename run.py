@@ -1,7 +1,8 @@
-import os, pypresence, json
+import os, json
 from ursina import Ursina
 from menus.main import Main
 from utils.utils import get_closest_resolution
+from ursina import window
 
 if os.path.exists('settings.json'):
     with open('settings.json', 'r') as settings_file:
@@ -32,6 +33,8 @@ if not args["fullscreen"]:
     args["size"] = list(map(int, settings['resolution'].split('x')))
 
 app = Ursina(title="Aim Trainer", development_mode=False, **args)
+window.editor_ui.enabled = True
+window.fps_counter.enabled = True
 
 if settings.get("music", True):
     from utils.preload import music_sound

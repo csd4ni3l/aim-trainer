@@ -7,8 +7,8 @@ from utils.preload import death_sound
 import json
 
 class Player(FirstPersonController):
-    def __init__(self, info_label, inventory, pypresence_client) -> None:
-        super().__init__(model='cube', z=16, color=color.orange, origin_y=-.5, speed=8, collider='box', gravity=False, shader=lit_with_shadows_shader)
+    def __init__(self, high_score, info_label, inventory, pypresence_client) -> None:
+        super().__init__(model='cube', z=16, color=color.orange, origin_y=-.5, speed=8, collider='box', gravity=True, shader=lit_with_shadows_shader)
 
         self.collider = BoxCollider(self, Vec3(0,1,0), Vec3(1,2,1))
 
@@ -19,7 +19,7 @@ class Player(FirstPersonController):
         self.info_label = info_label
         self.inventory = inventory
         self.pypresence_client = pypresence_client
-
+        self.high_score = high_score
         self.last_presence_update = time.perf_counter()
         self.shots_fired = 0
         self.shots_hit = 0
@@ -40,15 +40,18 @@ class Player(FirstPersonController):
 
         self.x = max(-16, min(self.x, 16))
         self.z = max(-16, min(self.z, 16))
-        self.info_label.text = f"Score: {self.score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%"
+        self.info_label.text = f"High Score: {self.high_score} Score: {self.score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%"
 
         weapon_name = self.inventory.slot_names[self.inventory.current_slot]
         self.weapon_attack_speed = weapons[weapon_name]["atk_speed"]
         self.weapon_dmg = weapons[weapon_name]["dmg"]
 
+        if self.score > self.high_score:
+            self.high_score = self.score
+
         if time.perf_counter() - self.last_presence_update >= 3:
             self.last_presence_update = time.perf_counter()
-            self.pypresence_client.update(state='Training Aim', details=f"Score: {self.score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%")
+            self.pypresence_client.update(state='Training Aim', details=f"High Score: {self.high_score} Score: {self.score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%")
 
     def summon_enemy(self):
         pass

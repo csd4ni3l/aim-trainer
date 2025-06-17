@@ -4,13 +4,19 @@ from game.enemy import Enemy
 from utils.constants import weapons, min_enemy_y, max_enemy_y
 from ursina import *
 from ursina.shaders import lit_with_shadows_shader
-import os
+import os, json
 
 enemy_file_names = os.listdir("assets/graphics/enemy")
 
 class Game():
     def __init__(self, pypresence_client) -> None:
         self.pypresence_client = pypresence_client
+
+        if os.path.exists("data.json"):
+            with open("data.json", "r") as file:
+                self.high_score = json.load(file)["high_score"]
+        else:
+            self.high_score = 0
 
         pypresence_client.update(state='Training Aim', details=f'Hits: 0/0 Accuracy: 0%')
 
@@ -23,7 +29,7 @@ class Game():
         for n, weapon in enumerate(weapons):
             self.inventory.append(weapons[weapon]["image"], weapon, n)
 
-        self.player = Player(self.info_label, self.inventory, pypresence_client)
+        self.player = Player(self.high_score, self.info_label, self.inventory, pypresence_client)
 
         self.shootables_parent = Entity()
         mouse.traverse_target = self.shootables_parent
@@ -40,6 +46,7 @@ class Game():
 
         self.sky = Sky()
         self.sky.update = self.update
+        
 
     def summon_enemy(self):
         if not len(self.enemies) >= 50:
@@ -50,7 +57,7 @@ class Game():
 
         if held_keys["escape"]:
             self.back_to_main_menu()
-        elif held_keys["space"]:
+        elif held_keys["n"]:
             self.summon_enemy()
 
     def back_to_main_menu(self):
@@ -70,3 +77,6 @@ class Game():
 
         for enemy in self.enemies:
             destroy(enemy)
+
+        with open("data.json", "w") as file:
+            file.write(json.dumps({"high_score": self.player.high_score}, indent=4))

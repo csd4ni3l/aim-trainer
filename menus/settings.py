@@ -1,9 +1,9 @@
 from ursina import *
 from ursina.prefabs.slider import ThinSlider
-from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
+from ursina.prefabs.dropdown_menu import DropdownMenuButton
 from ursina.prefabs.button_group import ButtonGroup
 import pypresence, json, copy
-from utils.utils import FakePyPresence
+from utils.utils import FakePyPresence, Dropdown
 from utils.constants import discord_presence_id, settings, settings_start_category
 from utils.preload import music_sound
 
@@ -58,19 +58,28 @@ class Settings:
                 self.ui.append(slider)
 
             else:
-                items = []
+                menu_buttons = []
                 for opt in info['options']:
-                    b = DropdownMenuButton(opt)
-                    b.on_click = lambda btn, n=name: self.update(n, btn.text)
-                    items.append(b)
-                dm = DropdownMenu(val, buttons=tuple(items))
-                dm.position = (.2, y)
-                self.ui.append(dm)
+                    menu_button = DropdownMenuButton(opt)
+                    menu_buttons.append(menu_button)
+
+                dropdown_menu = Dropdown(val, buttons=tuple(menu_buttons))
+                
+                for menu_button in menu_buttons:
+                    menu_button.on_click = lambda dropdown_menu=dropdown_menu, btn=menu_button, n=name: self.dropdown_update(n, dropdown_menu, btn)
+
+                dropdown_menu.position = (.2, y)
+                self.ui.append(dropdown_menu)
 
             y -= .08
 
         self.apply_button = Button('Apply', parent=camera.ui, color=color.green, scale=(.15, .08), position=(.6, -.4), on_click=self.apply_changes)
         self.ui.append(self.apply_button)
+
+    def dropdown_update(self, n, dropdown_menu, btn):
+        dropdown_menu.text = btn.text
+
+        self.update(n, btn.text)
 
     def update(self, name, value):
         self.edits[settings[self.category][name]['config_key']] = value
@@ -146,15 +155,15 @@ class Settings:
             text = file.read()
 
         if window.size.x >= 3840:
-            font_size = 2.4
+            font_size = 2.3
         elif window.size.x >= 2560:
-            font_size = 1.9
+            font_size = 1.8
         elif window.size.x >= 1920:
-            font_size = 1.6
+            font_size = 1.5
         elif window.size.x >= 1440:
-            font_size = 1.3
+            font_size = 1.2
         else:
-            font_size = 1.1
+            font_size = 1.0
 
         self.credits_label = Text(text=text, parent=camera.ui, position=(0, 0), origin=(0, 0), scale=font_size, color=color.white)
         self.credits_label.type = 'credits_text'

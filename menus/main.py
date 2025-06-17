@@ -46,14 +46,21 @@ class Main():
             self.pypresence_client = FakePyPresence()
             self.pypresence_client.start_time = time.time()
 
+        if os.path.exists("data.json"):
+            with open("data.json", "r") as file:
+                self.high_score = json.load(file)["high_score"]
+        else:
+            self.high_score = 0
+
         self.pypresence_client.update(state='In Main Menu', details='In Main Menu')
 
         button_spacing = .075 * 1.25
-        base_y = -2
+    
         self.menu_parent = Entity(parent=camera.ui, y=.15)
         self.main_menu = Entity(parent=self.menu_parent)
 
-        self.title_label = Text("Aim Trainer", parent=self.main_menu, y=-0.25 * button_spacing, scale=3, x=-.2)
+        self.title_label = Text("Aim Trainer", parent=self.main_menu, y=-0.01 * button_spacing, scale=3, x=-.2)
+        self.high_score_label = Text(f"High Score: {self.high_score}", parent=self.main_menu, scale=1.25, y=-1 * button_spacing, x=-.12)
         self.play_button = MenuButton('Play', on_click=Func(self.play), parent=self.main_menu, y=-2 * button_spacing)
         self.settings_button = MenuButton('Settings', on_click=Func(self.settings), parent=self.main_menu, y=-3 * button_spacing)
         self.quit_button = MenuButton('Quit', on_click=Sequence(Wait(.01), Func(application.quit)), parent=self.main_menu, y=-4 * button_spacing)
