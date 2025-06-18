@@ -1,12 +1,15 @@
 from game.inventory import Inventory
 from game.player import Player
 from game.enemy import Enemy
-from utils.constants import weapons, min_enemy_y, max_enemy_y
+
+from utils.constants import min_enemy_y, max_enemy_y
+
 from ursina import *
 from ursina.shaders import lit_with_shadows_shader
-import os, json
 
-enemy_file_names = os.listdir("assets/graphics/enemy")
+from pathlib import Path
+
+import os, json
 
 class Game():
     def __init__(self, pypresence_client) -> None:
@@ -20,16 +23,22 @@ class Game():
 
         pypresence_client.update(state='Training Aim', details=f'Hits: 0/0 Accuracy: 0%')
 
+        with open("settings.json", "r") as file:
+            self.settings_dict = json.load(file)
+
+        self.enemy_image_dir = self.settings_dict.get("enemy_image_directory", "assets/graphics/enemy")
+        self.enemy_file_names = [file_name for file_name in os.listdir(self.enemy_image_dir) if file_name.split(".")[1] in ["png", "jpg", "JPG"]]
+
         self.ground = Entity(model='plane', collider='box', scale=64, texture='grass', texture_scale=(4,4), shader=lit_with_shadows_shader)
 
         self.info_label = Text("Score: 0 Hits: 0/0 Accuracy: 0%", parent=camera.ui, position=(-0.1, 0.475))
 
-        self.inventory = Inventory(slots=len(weapons))
+        self.inventory = Inventory(slots=len(self.settings_dict.get("weapons")))
 
-        for n, weapon in enumerate(weapons):
-            self.inventory.append(weapons[weapon]["image"], weapon, n)
+        for n, weapon in enumerate(self.settings_dict.get("weapons")):
+            self.inventory.append(self.settings_dict.get("weapons")[weapon]["image"], weapon, n)
 
-        self.player = Player(self.high_score, self.info_label, self.inventory, pypresence_client)
+        self.player = Player(self.settings_dict, self.high_score, self.info_label, self.inventory, pypresence_client)
 
         self.shootables_parent = Entity()
         mouse.traverse_target = self.shootables_parent
@@ -47,10 +56,18 @@ class Game():
         self.sky = Sky()
         self.sky.update = self.update
         
-
     def summon_enemy(self):
         if not len(self.enemies) >= 50:
-            self.enemies.append(Enemy(self.player, self.shootables_parent, self.player.x + (random.randint(12, 24) * random.choice([1, -1])), random.randint(min_enemy_y, max_enemy_y), self.player.z + (random.randint(12, 24) * random.choice([1, -1])), "assets/graphics/enemy/" + random.choice(enemy_file_names)))
+            self.enemies.append(
+                Enemy(
+                    self.player, 
+                    self.shootables_parent,
+                    self.player.x + (random.randint(12, 24) * random.choice([1, -1])),
+                    random.randint(min_enemy_y, max_enemy_y),
+                    self.player.z + (random.randint(12, 24) * random.choice([1, -1])),
+                    Texture(Path(os.path.join(self.enemy_image_dir, random.choice(self.enemy_file_names))))
+                )
+            )
 
     def update(self):
         Sky.update(self.sky)

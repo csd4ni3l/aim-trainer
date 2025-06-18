@@ -1,4 +1,5 @@
-from ursina import Entity, Quad, color, camera, held_keys, destroy
+from ursina import Entity, Quad, color, camera, destroy, Texture
+from pathlib import Path
 
 class Inventory():
     def __init__(self, x=0, y=4.5, slot_width=0.1, slot_height=0.1, slots=5):
@@ -35,7 +36,7 @@ class Inventory():
         self.slot_grid[slot] = Entity(
             parent = camera.ui,
             model = Quad(radius=.015),
-            texture = item,
+            texture = Texture(Path(item)),
             scale = (self.slot_width, self.slot_height),
             position = (-.3 + slot * (self.slot_width * 1.25), -.4),
             z=-1,

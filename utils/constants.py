@@ -18,6 +18,10 @@ weapons = {
 discord_presence_id = 1380237183352311838
 
 settings = {
+    "Gameplay": {
+        "Enemy Image Directory": {"type": "directory_select", "config_key": "enemy_image_directory", "default": "assets/graphics/enemy"}
+    },
+    "Weapons": {"default": weapons},
     "Graphics": {
         "Window Mode": {"type": "option", "options": ["Windowed", "Fullscreen", "Borderless"], "config_key": "window_mode", "default": "Windowed"},
         "Resolution": {"type": "option", "options": ["1366x768", "1440x900", "1600x900", "1920x1080", "2560x1440", "3840x2160"], "config_key": "resolution"},
@@ -33,7 +37,7 @@ settings = {
     "Miscellaneous": {
         "Discord RPC": {"type": "bool", "config_key": "discord_rpc", "default": True},
     },
-    "Credits": {}
+    "Credits": None
 }
 
-settings_start_category = "Graphics"
+settings_start_category = "Gameplay"

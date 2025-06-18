@@ -8,7 +8,7 @@ class MenuButton(Button):
         super().__init__(text, scale=(.25, .075), highlight_color=color.azure, **kwargs)
 
         for key, value in kwargs.items():
-            setattr(self, key ,value)
+            setattr(self, key, value)
 
 class Main():
     def __init__(self, pypresence_client=None) -> None:

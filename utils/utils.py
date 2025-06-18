@@ -1,5 +1,6 @@
 from panda3d.core import GraphicsPipeSelection
 from ursina.prefabs.dropdown_menu import DropdownMenu
+from ursina.prefabs.file_browser import FileBrowser
 
 def get_closest_resolution():
     allowed_resolutions = [(1366, 768), (1440, 900), (1600,900), (1920,1080), (2560,1440), (3840,2160)]
@@ -43,6 +44,24 @@ class Dropdown(DropdownMenu):
                 self.open()
             else:
                 self.close()
+
+class FileManager(FileBrowser):
+    def open(self, path=None):
+        if not self.selection:
+            return
+
+        if not self.return_folders:
+            if self.selection[0].is_dir():
+                self.path = self.selection[0]
+                return
+            
+        elif not self.selection[0].is_dir():
+            return
+
+        if hasattr(self, 'on_submit'):
+            self.on_submit(self.selection)
+
+        self.close()
 
 class FakePyPresence():
     def __init__(self):

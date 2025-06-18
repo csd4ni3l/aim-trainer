@@ -33,6 +33,7 @@ if not args["fullscreen"]:
     args["size"] = list(map(int, settings['resolution'].split('x')))
 
 app = Ursina(title="Aim Trainer", development_mode=False, **args)
+
 window.editor_ui.enabled = True
 window.fps_counter.enabled = True
 
