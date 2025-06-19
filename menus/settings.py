@@ -219,7 +219,7 @@ class Settings:
     def enemies(self):
         y = .3
 
-        for enemy_name, enemy_dict in list(self.data.get("enemies", settings["Enemies"]["default"]).items()) + list({"New": {"speed": 0.12, "size": 1.0, "image": None}}.items()):
+        for enemy_name, enemy_dict in list(self.data.get("enemies", settings["Enemies"]["default"]).items()) + list({"New": {"speed": 0.1, "size": 1.0, "image": None}}.items()):
             speed, size, image = enemy_dict["speed"], enemy_dict["size"], enemy_dict["image"]
             self.enemy_img_paths[enemy_name] = image
 

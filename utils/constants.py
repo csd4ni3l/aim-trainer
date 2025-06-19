@@ -1,4 +1,4 @@
-min_enemy_y = 0
+min_enemy_y = 1
 max_enemy_y = 20
 min_enemy_movement = 7
 max_enemy_movement = 10
@@ -14,7 +14,7 @@ weapons = {
 }
 
 enemies = {
-    "default": {"speed": 0.12, "size": 1, "image": "assets/graphics/default_enemy.png"} 
+    "default": {"speed": 0.1, "size": 1, "image": "assets/graphics/default_enemy.png"} 
 }
 
 discord_presence_id = 1380237183352311838
