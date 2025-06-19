@@ -164,13 +164,16 @@ class Settings:
         else:
             music_sound.stop()
 
+        self.data["weapons"] = self.data.get("weapons", settings["Weapons"]["default"])
+        self.data["enemies"] = self.data.get("enemies", settings["Enemies"]["default"])
+
         if self.category == "Weapons":
-            for name in self.data.get("weapons", settings["Weapons"]["default"]):
+            for name in self.data["weapons"]:
                 dmg, attack_speed, image = self.weapon_dmg_inputs[name].text, self.weapon_atk_speed_inputs[name].text, self.weapon_img_paths[name]
                 self.data["weapons"][name] = {"dmg": float(dmg), "atk_speed": float(attack_speed), "image": image}
 
         elif self.category == "Enemies":
-            for name in self.data.get("enemies", settings["Enemies"]["default"]):
+            for name in self.data["enemies"]:
                 speed, size, image = self.enemy_speed_inputs[name].text, self.enemy_size_inputs[name].text, self.enemy_img_paths[name]
                 self.data["enemies"][name] = {"speed": float(speed), "size": float(size), "image": image}
 
