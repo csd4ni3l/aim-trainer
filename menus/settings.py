@@ -238,7 +238,7 @@ class Settings:
             self.ui.append(self.enemy_size_inputs[enemy_name])
 
             self.ui.append(Text("Image Path: ", parent=camera.ui, position=(-.05, y), scale=1.2))
-            self.enemy_img_path_buttons[enemy_name] = Button(text=f"Select File ({image})", scale_x=.6, scale_y=0.05, text_size=.75, position=(0.43, y - .01))
+            self.enemy_img_path_buttons[enemy_name] = Button(text=f"Select File ({image})", scale_x=.6, scale_y=0.05, text_size=.5, position=(0.43, y - .01))
             self.enemy_img_path_buttons[enemy_name].on_click = lambda name=enemy_name, btn=self.enemy_img_path_buttons[enemy_name]: self.select_image_file(btn, name, "enemy")
             self.ui.append(self.enemy_img_path_buttons[enemy_name])
 
