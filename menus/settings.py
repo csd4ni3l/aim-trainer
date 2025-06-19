@@ -164,13 +164,13 @@ class Settings:
         else:
             music_sound.stop()
 
-        if self.category == "Weapons" and self.data["weapons"]:
-            for name in self.data["weapons"]:
+        if self.category == "Weapons":
+            for name in self.data.get("weapons", settings["Weapons"]["default"]):
                 dmg, attack_speed, image = self.weapon_dmg_inputs[name].text, self.weapon_atk_speed_inputs[name].text, self.weapon_img_paths[name]
                 self.data["weapons"][name] = {"dmg": float(dmg), "atk_speed": float(attack_speed), "image": image}
 
-        if self.category == "Enemies" and self.data["enemies"]:
-            for name in self.data["enemies"]:
+        elif self.category == "Enemies":
+            for name in self.data.get("enemies", settings["Enemies"]["default"]):
                 speed, size, image = self.enemy_speed_inputs[name].text, self.enemy_size_inputs[name].text, self.enemy_img_paths[name]
                 self.data["enemies"][name] = {"speed": float(speed), "size": float(size), "image": image}
 
@@ -183,7 +183,7 @@ class Settings:
         name, speed, size, image = self.new_enemy_name_input.text, self.enemy_speed_inputs["New"].text, self.enemy_size_inputs["New"].text, self.enemy_img_paths["New"]
         self.data["enemies"] = self.data.get("enemies", settings["Enemies"]["default"])
         
-        if name in self.data["enemies"] or not name or not speed or not is_float(speed) or not size or not is_float(size) or not image:
+        if name in self.data["enemies"] or not name or not speed or not is_float(speed) or not size or not is_float or not image:
             return
 
         self.data["enemies"][name] = {"speed": float(speed), "size": float(size), "image": image}
