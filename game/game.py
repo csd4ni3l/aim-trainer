@@ -2,7 +2,7 @@ from game.inventory import Inventory
 from game.player import Player
 from game.enemy import Enemy
 
-from utils.constants import min_enemy_y, max_enemy_y
+from utils.constants import min_enemy_y, max_enemy_y, enemies
 
 from ursina import *
 from ursina.shaders import lit_with_shadows_shader
@@ -26,8 +26,7 @@ class Game():
         with open("settings.json", "r") as file:
             self.settings_dict = json.load(file)
 
-        self.enemy_image_dir = self.settings_dict.get("enemy_image_directory", "assets/graphics/enemy")
-        self.enemy_file_names = [file_name for file_name in os.listdir(self.enemy_image_dir) if file_name.split(".")[1] in ["png", "jpg", "JPG"]]
+        self.enemy_types = self.settings_dict.get("enemies", enemies)
 
         self.ground = Entity(model='plane', collider='box', scale=64, texture='grass', texture_scale=(4,4), shader=lit_with_shadows_shader)
 
@@ -58,14 +57,18 @@ class Game():
         
     def summon_enemy(self):
         if not len(self.enemies) >= 50:
+            enemy_stats = random.choice(list(self.enemy_types.items()))[1]
+            speed, size, image_path = enemy_stats["speed"], enemy_stats["size"], enemy_stats["image"]
             self.enemies.append(
                 Enemy(
+                    speed,
+                    size,
                     self.player, 
                     self.shootables_parent,
                     self.player.x + (random.randint(12, 24) * random.choice([1, -1])),
                     random.randint(min_enemy_y, max_enemy_y),
                     self.player.z + (random.randint(12, 24) * random.choice([1, -1])),
-                    Texture(Path(os.path.join(self.enemy_image_dir, random.choice(self.enemy_file_names))))
+                    Texture(Path(image_path))
                 )
             )
 

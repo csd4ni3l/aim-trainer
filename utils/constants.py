@@ -1,9 +1,7 @@
-min_enemy_y = 9
-max_enemy_y = 16
+min_enemy_y = 0
+max_enemy_y = 20
 min_enemy_movement = 7
 max_enemy_movement = 10
-min_enemy_speed = 0.08
-max_enemy_speed = 0.12
 enemy_health = 100
 
 weapons = {
@@ -15,12 +13,14 @@ weapons = {
     "sniper": {"dmg": 100, "atk_speed": 1, "image": "assets/graphics/sniper.png"},
 }
 
+enemies = {
+    "default": {"speed": 0.12, "size": 1, "image": "assets/graphics/default_enemy.png"} 
+}
+
 discord_presence_id = 1380237183352311838
 
 settings = {
-    "Gameplay": {
-        "Enemy Image Directory": {"type": "directory_select", "config_key": "enemy_image_directory", "default": "assets/graphics/enemy"}
-    },
+    "Enemies": {"default": enemies},
     "Weapons": {"default": weapons},
     "Graphics": {
         "Window Mode": {"type": "option", "options": ["Windowed", "Fullscreen", "Borderless"], "config_key": "window_mode", "default": "Windowed"},
@@ -40,4 +40,4 @@ settings = {
     "Credits": None
 }
 
-settings_start_category = "Gameplay"
+settings_start_category = "Enemies"

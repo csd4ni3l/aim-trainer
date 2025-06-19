@@ -5,7 +5,7 @@ from ursina.prefabs.ursfx import ursfx
 from ursina.prefabs.first_person_controller import FirstPersonController
 
 from utils.preload import death_sound
-from utils.constants import max_enemy_speed, weapons
+from utils.constants import weapons
 
 import json
 
@@ -46,7 +46,7 @@ class Player(FirstPersonController):
 
         self.x = max(-16, min(self.x, 16))
         self.z = max(-16, min(self.z, 16))
-        self.info_label.text = f"High Score: {self.high_score} Score: {self.score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%"
+        self.info_label.text = f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%"
 
         weapon_name = self.inventory.slot_names[self.inventory.current_slot]
         self.gun.texture = Texture(Path(self.settings_dict.get("weapons", weapons)[weapon_name]["image"]))
@@ -58,7 +58,7 @@ class Player(FirstPersonController):
 
         if time.perf_counter() - self.last_presence_update >= 3:
             self.last_presence_update = time.perf_counter()
-            self.pypresence_client.update(state='Training Aim', details=f"High Score: {self.high_score} Score: {self.score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%")
+            self.pypresence_client.update(state='Training Aim', details=f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%")
 
     def summon_enemy(self):
         pass
@@ -79,7 +79,7 @@ class Player(FirstPersonController):
                 mouse.hovered_entity.hp -= self.weapon_dmg
                 mouse.hovered_entity.blink(color.red)
 
-                self.score += int(distance(mouse.hovered_entity, self) * (mouse.hovered_entity.speed / max_enemy_speed))
+                self.score += int(distance(mouse.hovered_entity, self))
 
                 self.shots_hit += 1
 

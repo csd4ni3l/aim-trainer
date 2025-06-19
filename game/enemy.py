@@ -1,16 +1,16 @@
 from ursina import *
-from utils.constants import min_enemy_speed, max_enemy_speed, enemy_health, min_enemy_movement, max_enemy_movement
+from utils.constants import enemy_health, min_enemy_movement, max_enemy_movement
 from ursina.shaders import lit_with_shadows_shader
 
 class Enemy(Entity):
-    def __init__(self, player, shootables_parent, x, y, z, texture):
-        super().__init__(parent=shootables_parent, model='cube', collider='box', texture=texture, x=x, y=y, z=z, shader=lit_with_shadows_shader)
+    def __init__(self, speed, size, player, shootables_parent, x, y, z, texture):
+        super().__init__(parent=shootables_parent, model='cube', collider='box', texture=texture, x=x, y=y, z=z, shader=lit_with_shadows_shader, scale=size)
         self.health_bar = Entity(parent=self, y=1.2, model='cube', color=color.red, world_scale=(1.5,.1,.1))
         self.max_hp = enemy_health
         self.hp = self.max_hp
-        self.type = random.choice(["left", "right", "top", "bottom"])
+        self.movement_type = random.choice(["left", "right", "top"])
         self.movement_done = 0
-        self.speed = random.uniform(min_enemy_speed, max_enemy_speed)
+        self.speed = speed
         self.movement_amount = random.uniform(min_enemy_movement, max_enemy_movement)
         self.player = player
 
@@ -26,16 +26,16 @@ class Enemy(Entity):
         start = self.position
         end = self.position
 
-        if self.type == "left":
+        if self.movement_type == "left":
             end -= Vec3(max(0.05, remaining), 0, 0)
             scale = Vec3(max(0.05, remaining), 0.05, 0.05)
-        elif self.type == "right":
+        elif self.movement_type == "right":
             end += Vec3(max(0.05, remaining), 0, 0)
             scale = Vec3(max(0.05, remaining), 0.05, 0.05)
-        elif self.type == "top":
+        elif self.movement_type == "top":
             end += Vec3(0, max(0.05, remaining), 0)
             scale = Vec3(0.05, max(0.05, remaining), 0.05)
-        elif self.type == "bottom":
+        elif self.movement_type == "bottom":
             end -= Vec3(0, max(0.05, remaining), 0)
             scale = Vec3(0.05, max(0.05, remaining), 0.05)
 
@@ -49,33 +49,33 @@ class Enemy(Entity):
         self.health_bar.look_at_2d(self.player, axis="x")
         self.look_at_2d(self.player, axis="y")
 
-        if self.type == "left":
+        if self.movement_type == "left":
             if self.movement_done < self.movement_amount:
                 self.x -= self.speed
                 self.movement_done += self.speed
             else:
-                self.type = "right"
+                self.movement_type = "right"
                 self.movement_done = 0
-        elif self.type == "right":
+        elif self.movement_type == "right":
             if self.movement_done < self.movement_amount:
                 self.x += self.speed
                 self.movement_done += self.speed
             else:
-                self.type = "left"
+                self.movement_type = "left"
                 self.movement_done = 0
-        elif self.type == "top":
+        elif self.movement_type == "top":
             if self.movement_done < self.movement_amount:
                 self.y += self.speed
                 self.movement_done += self.speed
             else:
-                self.type = "bottom"
+                self.movement_type = "bottom"
                 self.movement_done = 0
-        elif self.type == "bottom":
+        elif self.movement_type == "bottom":
             if self.movement_done < self.movement_amount:
                 self.y -= self.speed
                 self.movement_done += self.speed
             else:
-                self.type = "top"
+                self.movement_type = "top"
                 self.movement_done = 0
 
         self.update_path_line()

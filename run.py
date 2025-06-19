@@ -34,8 +34,11 @@ if not args["fullscreen"]:
 
 app = Ursina(title="Aim Trainer", development_mode=False, **args)
 
+window.cog_button.enabled = False
 window.editor_ui.enabled = True
 window.fps_counter.enabled = True
+window.collider_counter.enabled = False
+window.entity_counter.enabled = False
 
 if settings.get("music", True):
     from utils.preload import music_sound
