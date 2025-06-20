@@ -16,17 +16,16 @@ class Settings:
         self.data = json.load(open('settings.json'))
         self.edits = {}
         self.category = settings_start_category
-        self.ui = []
-
+    
         self.main = Entity(parent=camera.ui, model='cube', color=color.dark_gray, scale=(1.8, 1.2), z=1)
 
-        self.back = Button('Back', parent=camera.ui, color=color.gray, scale=(.1, .05), position=(-.8, .45), on_click=self.exit)
+        self.back_button = Button('Back', parent=camera.ui, color=color.gray, scale=(.1, .05), position=(-.8, .45), on_click=self.exit)
 
         self.category_group = ButtonGroup(tuple(settings.keys()), default=self.category, spacing=(.25, 0, 0))
         self.category_group.on_value_changed = lambda: self.show(self.category_group.value)
         self.category_group.position = (-.6, .4)
 
-        self.ui += [self.main, self.back, self.category_group]
+        self.ui = [self.main, self.back_button, self.category_group]
 
         self.weapon_dmg_inputs = {}
         self.weapon_atk_speed_inputs = {}
@@ -298,7 +297,7 @@ class Settings:
 
     def clear(self):
         for e in list(self.ui):
-            if e not in (self.main, self.back, self.category_group):
+            if e not in (self.main, self.back_button, self.category_group):
                 destroy(e)
                 self.ui.remove(e)
 

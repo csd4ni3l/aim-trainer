@@ -67,8 +67,8 @@ class Main():
 
     def play(self):
         self.hide()
-        from game.game import Game
-        Game(self.pypresence_client)
+        from menus.game_modes import GameModeSelector
+        GameModeSelector(self.pypresence_client)
 
     def settings(self):
         self.hide()

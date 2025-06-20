@@ -4,6 +4,8 @@ min_enemy_movement = 7
 max_enemy_movement = 10
 enemy_health = 100
 
+game_modes = ["Training", "Waves", "1 Minute Test"]
+
 weapons = {
     "assault_rifle": {"dmg": 20, "atk_speed": 0.2, "image": "assets/graphics/assaultrifle.png"},
     "smg": {"dmg": 10, "atk_speed": 0.1, "image": "assets/graphics/smg.png"},

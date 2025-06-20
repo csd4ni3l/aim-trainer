@@ -8,11 +8,10 @@ from utils.preload import death_sound
 from utils.constants import weapons
 
 import json
-
 from pathlib import Path
 
 class Player(FirstPersonController):
-    def __init__(self, settings_dict, high_score, info_label, inventory, pypresence_client) -> None:
+    def __init__(self, game_mode, settings_dict, high_score, info_label, inventory, pypresence_client) -> None:
         super().__init__(model='cube', z=16, color=color.orange, origin_y=-.5, speed=8, collider='box', gravity=True, shader=lit_with_shadows_shader)
 
         self.collider = BoxCollider(self, Vec3(0,1,0), Vec3(1,2,1))
@@ -22,7 +21,16 @@ class Player(FirstPersonController):
         self.pypresence_client = pypresence_client
         self.high_score = high_score
         self.settings_dict = settings_dict
+        self.game_mode = game_mode
         
+        if self.game_mode == "waves":
+            self.wave_number = 1
+            self.wave_enemies_left = 20
+            self.wave_time = 90
+            self.last_wave_time = time.perf_counter()
+        elif self.game_mode == "1 minute test":
+            self.test_start = time.perf_counter()
+
         self.last_presence_update = time.perf_counter()
         self.shots_fired = 0
         self.shots_hit = 0
@@ -46,7 +54,16 @@ class Player(FirstPersonController):
 
         self.x = max(-16, min(self.x, 16))
         self.z = max(-16, min(self.z, 16))
-        self.info_label.text = f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%"
+
+        if self.game_mode == "waves":
+            info_text = f"Wave: {self.wave_number} Enemies Left: {self.wave_enemies_left} Time Left: {round(self.wave_time - (time.perf_counter() - self.last_wave_time), 2)}s "
+        elif self.game_mode == "1 minute test":
+            info_text = f"Time Left: {round(60 - (time.perf_counter() - self.test_start))} "
+        else:
+            info_text = ""
+
+        info_text += f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%"
+        self.info_label.text = info_text
 
         weapon_name = self.inventory.slot_names[self.inventory.current_slot]
         self.gun.texture = Texture(Path(self.settings_dict.get("weapons", weapons)[weapon_name]["image"]))
@@ -59,7 +76,7 @@ class Player(FirstPersonController):
         if time.perf_counter() - self.last_presence_update >= 3:
             self.last_presence_update = time.perf_counter()
             self.pypresence_client.update(state='Training Aim', details=f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%")
-
+        
     def summon_enemy(self):
         pass
 
@@ -79,7 +96,10 @@ class Player(FirstPersonController):
                 mouse.hovered_entity.hp -= self.weapon_dmg
                 mouse.hovered_entity.blink(color.red)
 
-                self.score += int(distance(mouse.hovered_entity, self))
+                base_distance_score = distance(mouse.hovered_entity, self) * 10
+                damage_multiplier = self.weapon_dmg / mouse.hovered_entity.max_hp
+                attack_speed_multiplier = ((1 / self.weapon_attack_speed) ** 0.5) / 10
+                self.score += int(base_distance_score * damage_multiplier * attack_speed_multiplier)
 
                 self.shots_hit += 1
 
@@ -90,7 +110,20 @@ class Player(FirstPersonController):
 
                     death_sound.play()
 
-                    self.summon_enemy()
+                    if self.game_mode == "waves":
+                        self.wave_enemies_left -= 1
+
+                        if self.wave_enemies_left <= 0:
+                            self.wave_time += 20
+                            self.wave_number += 1 
+                            self.wave_enemies_left = 20 + (self.wave_number * 5)
+                            self.last_wave_time = time.perf_counter()
+
+                            for _ in range(self.wave_enemies_left):
+                                self.summon_enemy()
+                    
+                    else:
+                        self.summon_enemy()
 
             self.accuracy = (self.shots_hit / self.shots_fired) * 100
 
