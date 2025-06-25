@@ -2,15 +2,15 @@ from ursina import *
 
 from ursina.shaders import lit_with_shadows_shader
 from ursina.prefabs.ursfx import ursfx
-from ursina.prefabs.first_person_controller import FirstPersonController
 
 from utils.preload import death_sound
 from utils.constants import weapons
+from utils.utils import FixedFirstPersonController
 
 import json
 from pathlib import Path
 
-class Player(FirstPersonController):
+class Player(FixedFirstPersonController):
     def __init__(self, game_mode, settings_dict, high_score, info_label, inventory, pypresence_client) -> None:
         super().__init__(model='cube', z=16, color=color.orange, origin_y=-.5, speed=8, collider='box', gravity=True, shader=lit_with_shadows_shader)
 
@@ -47,48 +47,56 @@ class Player(FirstPersonController):
             self.settings_dict = json.load(file)
 
     def update(self):
-        super().update()
+        if self.enabled:
+            super().update()
 
-        if held_keys['left mouse']:
-            self.shoot()
+            if held_keys['left mouse'] or held_keys["gamepad right trigger"]:
+                self.shoot()
 
-        self.x = max(-16, min(self.x, 16))
-        self.z = max(-16, min(self.z, 16))
+            self.x = max(-16, min(self.x, 16))
+            self.z = max(-16, min(self.z, 16))
 
-        if self.game_mode == "waves":
-            info_text = f"Wave: {self.wave_number} Enemies Left: {self.wave_enemies_left} Time Left: {round(self.wave_time - (time.perf_counter() - self.last_wave_time), 2)}s "
-        elif self.game_mode == "1 minute test":
-            info_text = f"Time Left: {round(60 - (time.perf_counter() - self.test_start))} "
-        else:
-            info_text = ""
+            if self.game_mode == "waves":
+                info_text = f"Wave: {self.wave_number} Enemies Left: {self.wave_enemies_left} Time Left: {round(self.wave_time - (time.perf_counter() - self.last_wave_time), 2)}s "
+            elif self.game_mode == "1 minute test":
+                info_text = f"Time Left: {round(60 - (time.perf_counter() - self.test_start))} "
+            else:
+                info_text = ""
 
-        info_text += f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%"
-        self.info_label.text = info_text
+            info_text += f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%"
+            self.info_label.text = info_text
 
-        weapon_name = self.inventory.slot_names[self.inventory.current_slot]
-        self.gun.texture = Texture(Path(self.settings_dict.get("weapons", weapons)[weapon_name]["image"]))
-        self.weapon_attack_speed = self.settings_dict.get("weapons", weapons)[weapon_name]["atk_speed"]
-        self.weapon_dmg = self.settings_dict.get("weapons", weapons)[weapon_name]["dmg"]
+            weapon_name = self.inventory.slot_names[self.inventory.current_slot]
+            self.gun.texture = Texture(Path(self.settings_dict.get("weapons", weapons)[weapon_name]["image"]))
+            self.weapon_attack_speed = self.settings_dict.get("weapons", weapons)[weapon_name]["atk_speed"]
+            self.weapon_dmg = self.settings_dict.get("weapons", weapons)[weapon_name]["dmg"]
 
-        if self.score > self.high_score:
-            self.high_score = self.score
+            if self.score > self.high_score:
+                self.high_score = self.score
 
-        if time.perf_counter() - self.last_presence_update >= 3:
-            self.last_presence_update = time.perf_counter()
-            self.pypresence_client.update(state='Training Aim', details=f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%")
-        
+            if time.perf_counter() - self.last_presence_update >= 3:
+                self.last_presence_update = time.perf_counter()
+                self.pypresence_client.update(state='Training Aim', details=f"Score: {self.score} High Score: {self.high_score} Hits: {self.shots_fired}/{self.shots_hit} Accuracy: {round(self.accuracy, 2)}%")
+            
     def summon_enemy(self):
         pass
+
+    def try_to_disable_muzzle_flash(self): # without this method, 100% accuracy test crashes, because using .disable on a destroyed entity is not allowed
+        try:
+            self.gun.muzzle_flash.disable()
+        except:
+            pass
 
     def shoot(self):
         if not self.gun.on_cooldown:
             self.gun.on_cooldown = True
+
             self.gun.muzzle_flash.enabled = True
 
             if self.settings_dict.get("sfx", True):
                 ursfx([(0.0, 0.0), (0.1, 0.9), (0.15, 0.75), (0.3, 0.14), (0.6, 0.0)], volume=0.5, wave='noise', pitch=random.uniform(-13,-12), pitch_change=-12, speed=3.0)
 
-            invoke(self.gun.muzzle_flash.disable, delay=.05)
+            invoke(self.try_to_disable_muzzle_flash, delay=.05)
             invoke(setattr, self.gun, 'on_cooldown', False, delay=self.weapon_attack_speed)
             self.shots_fired += 1
 

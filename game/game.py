@@ -44,12 +44,10 @@ class Game():
         self.shootables_parent = Entity()
         mouse.traverse_target = self.shootables_parent
         
-        if self.game_mode == "1 minute test":
-            enemy_num = 10
-        elif self.game_mode == "training":
-            enemy_num = 25
-        else:
+        if self.game_mode == "waves":
             enemy_num = self.player.wave_enemies_left
+        else:
+            enemy_num = 15    
 
         for _ in range(enemy_num):
             self.summon_enemy()
@@ -62,7 +60,7 @@ class Game():
         self.sky.input = self.input
 
         if self.game_mode == "training":
-            self.create_enemies_label = Text("Use n to create new targets.", parent=camera.ui, position=(-0.85, -0.4), scale=1.3)
+            self.create_enemies_label = Text("Use n or Controller A to create new targets.", parent=camera.ui, position=(-0.875, -0.4), scale=1)
 
     def summon_enemy(self):
         enemy_stats = random.choice(list(self.enemy_types.items()))[1]
@@ -89,10 +87,13 @@ class Game():
         if self.game_mode == "1 minute test" and time.perf_counter() - self.player.test_start >= 1:
             self.game_over()
 
+        if self.game_mode == r"100% accuracy test" and self.player.shots_fired - self.player.shots_hit >= 1:
+            self.game_over()
+
     def input(self, key):
-        if key == "escape":
+        if key == "escape" or key == "gamepad start":
             self.back_to_main_menu()
-        elif key == "n" and not self.game_mode == "1 minute test":
+        elif not self.game_mode == "1 minute test" and (key == "n" or key == "gamepad a"):
             self.summon_enemy()
 
     def game_over(self):
@@ -115,6 +116,12 @@ class Game():
         Main(self.pypresence_client)
 
     def hide(self):
+        if self.game_over_triggered:
+            destroy(self.main)
+            destroy(self.game_over_label)
+            destroy(self.exit_button)
+            return
+
         destroy(self.ground)
         destroy(self.sun)
         destroy(self.sky)
@@ -126,11 +133,6 @@ class Game():
 
         self.inventory.hide()
         self.player.hide()
-        
-        if self.game_over_triggered:
-            destroy(self.main)
-            destroy(self.game_over_label)
-            destroy(self.exit_button)
 
         if self.game_mode == "training":
             destroy(self.create_enemies_label)

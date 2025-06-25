@@ -25,9 +25,9 @@ class Inventory():
         if key.isnumeric() and int(key) <= self.slot_number:
             self.switch_to(int(key) - 1)
 
-        if key == "scroll down":
+        if key == "scroll down" or key == "gamepad dpad right":
             self.switch_to(min(self.slot_number - 1, self.current_slot + 1))
-        elif key == "scroll up":
+        elif key == "scroll up" or key == "gamepad dpad left":
             self.switch_to(max(0, self.current_slot - 1))
 
     def append(self, item, name, slot):
