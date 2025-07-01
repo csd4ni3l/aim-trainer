@@ -84,7 +84,7 @@ class Game():
         if self.game_mode == "waves" and time.perf_counter() - self.player.last_wave_time >= self.player.wave_time:
             self.game_over()
         
-        if self.game_mode == "1 minute test" and time.perf_counter() - self.player.test_start >= 1:
+        if self.game_mode == "1 minute test" and time.perf_counter() - self.player.test_start >= 60:
             self.game_over()
 
         if self.game_mode == r"100% accuracy test" and self.player.shots_fired - self.player.shots_hit >= 1:
