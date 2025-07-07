@@ -4,28 +4,28 @@ from ursina.prefabs.dropdown_menu import DropdownMenuButton
 from ursina.prefabs.button_group import ButtonGroup
 
 import pypresence, json, copy
-from utils.utils import FakePyPresence, Dropdown, FileManager, is_float
+
+from utils.utils import FakePyPresence, Dropdown, FileManager, FocusView, is_float
 from utils.constants import discord_presence_id, settings, settings_start_category
 from utils.preload import music_sound
 
-class Settings:
+class Settings(FocusView):
     def __init__(self, rpc):
+        super().__init__(model='cube', color=color.dark_gray, scale=(1.8, 1.2), z=1)
+
         self.rpc = rpc
         rpc.update(state='In Settings', details='Modifying Settings', start=rpc.start_time)
 
         self.data = json.load(open('settings.json'))
         self.edits = {}
         self.category = settings_start_category
-    
-        self.main = Entity(parent=camera.ui, model='cube', color=color.dark_gray, scale=(1.8, 1.2), z=1)
 
-        self.back_button = Button('Back', parent=camera.ui, color=color.gray, scale=(.1, .05), position=(-.8, .45), on_click=self.exit)
+        self.ui = [self.main]
 
         self.category_group = ButtonGroup(tuple(settings.keys()), default=self.category, spacing=(.25, 0, 0))
         self.category_group.on_value_changed = lambda: self.show(self.category_group.value)
         self.category_group.position = (-.6, .4)
-
-        self.ui = [self.main, self.back_button, self.category_group]
+        self.ui.append(self.category_group)
 
         self.weapon_dmg_inputs = {}
         self.weapon_atk_speed_inputs = {}
@@ -39,7 +39,13 @@ class Settings:
         self.enemy_img_path_buttons = {}
         self.enemy_remove_buttons = {}
 
+        self.back_button = Button('Back', parent=camera.ui, color=color.gray, scale=(.1, .05), position=(-.8, .45), on_click=self.exit)
+
         self.show(self.category)
+
+        self.ui.append(self.back_button)
+
+        self.detect_focusable_widgets()
 
     def show(self, category):
         self.clear()
@@ -66,13 +72,13 @@ class Settings:
             if type == 'bool':
                 bool_button_group = ButtonGroup(('OFF', 'ON'), default='ON' if val else 'OFF', spacing=(.1, 0, 0))
                 bool_button_group.position = (.2, y)
-                bool_button_group.on_value_changed = lambda bool_button_group=bool_button_group, n=name: self.update(n, bool_button_group.value == 'ON')
+                bool_button_group.on_value_changed = lambda bool_button_group=bool_button_group, n=name: self.update_settings(n, bool_button_group.value == 'ON')
                 self.ui.append(bool_button_group)
 
             elif type == 'slider':
-                slider = ThinSlider(text=name, min=info['min'], max=info['max'], default=val, dynamic=True)
+                slider = ThinSlider(min=info['min'], max=info['max'], default=val, dynamic=True)
                 slider.position = (.2, y)
-                slider.on_value_changed = lambda slider=slider, n=name: self.update(n, int(slider.value))
+                slider.on_value_changed = lambda slider=slider, n=name: self.update_settings(n, int(slider.value))
                 self.ui.append(slider)
 
             elif type == "option":
@@ -100,10 +106,12 @@ class Settings:
         self.apply_button = Button('Apply', parent=camera.ui, color=color.green, scale=(.15, .08), position=(.6, -.4), on_click=self.apply_changes)
         self.ui.append(self.apply_button)
 
+        self.detect_focusable_widgets()
+
     def directory_selected(self, btn, name, value):
         btn.text = f"Select Directory ({value})"
 
-        self.update(name, value)
+        self.update_settings(name, value)
 
     def select_directory(self, btn, name):
         self.dir_file_manager = FileManager(return_folders=True, z=-1)
@@ -123,9 +131,9 @@ class Settings:
     def dropdown_update(self, n, dropdown_menu, btn):
         dropdown_menu.text = btn.text
 
-        self.update(n, btn.text)
+        self.update_settings(n, btn.text)
 
-    def update(self, name, value):
+    def update_settings(self, name, value):
         self.edits[settings[self.category][name]['config_key']] = value
 
     def apply_changes(self):
@@ -255,6 +263,8 @@ class Settings:
         self.apply_button = Button('Apply', parent=camera.ui, color=color.green, scale=(.15, .08), position=(.6, -.4), on_click=self.apply_changes)
         self.ui.append(self.apply_button)
 
+        self.detect_focusable_widgets()
+
     def weapons(self):
         y = .3
 
@@ -295,16 +305,15 @@ class Settings:
         self.apply_button = Button('Apply', parent=camera.ui, color=color.green, scale=(.15, .08), position=(.6, -.4), on_click=self.apply_changes)
         self.ui.append(self.apply_button)
 
+        self.detect_focusable_widgets()
+
     def clear(self):
         for e in list(self.ui):
             if e not in (self.main, self.back_button, self.category_group):
                 destroy(e)
                 self.ui.remove(e)
 
-    def hide(self):
-        for e in self.ui:
-            destroy(e)
-        self.ui.clear()
+        self.detect_focusable_widgets()
 
     def exit(self):
         self.hide()
@@ -340,3 +349,5 @@ class Settings:
         self.credits_label = Text(text=text, parent=camera.ui, position=(0, 0), origin=(0, 0), scale=font_size, color=color.white)
         self.credits_label.type = 'credits_text'
         self.ui.append(self.credits_label)
+
+        self.detect_focusable_widgets()

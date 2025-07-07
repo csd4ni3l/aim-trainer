@@ -1,5 +1,5 @@
 from panda3d.core import GraphicsPipeSelection
-from ursina.prefabs.dropdown_menu import DropdownMenu
+from ursina.prefabs.dropdown_menu import DropdownMenu, DropdownMenuButton
 from ursina.prefabs.file_browser import FileBrowser
 from ursina.prefabs.first_person_controller import FirstPersonController
 from ursina import *
@@ -34,8 +34,10 @@ class Dropdown(DropdownMenu):
 
         self.scale = (.4,.04)
 
-
     def on_mouse_enter(self):
+        ...
+
+    def update(self):
         ...
     
     def input(self, key):
@@ -80,6 +82,106 @@ def is_float(string):
     except ValueError:
         return False
     
+class MenuButton(Button):
+    def __init__(self, text='', **kwargs):
+        super().__init__(text, scale=(.25, .075), highlight_color=color.azure, **kwargs)
+
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+class FocusView():
+    def __init__(self, **kwargs):
+        self.ui = []
+        self.focusable_widgets = []
+        self.button_group_buttons = {}
+        self.focused_index = -1
+
+        self.main = Entity(parent=camera.ui, **kwargs)
+        self.main.update = self.update
+        self.main.input = self.input
+        self.previously_focused_index = -1
+
+    def detect_focusable_widgets(self):
+        self.focusable_widgets = []
+        self.button_group_buttons = {}
+
+        n = 0
+
+        for entity in self.ui:
+            if isinstance(entity, (MenuButton, Dropdown, Button, InputField, DropdownMenuButton)):
+                self.focusable_widgets.append(entity)
+                n += 1
+            elif isinstance(entity, ButtonGroup):
+                for button in entity.buttons:
+                    self.focusable_widgets.append(button)
+                    self.button_group_buttons[n] = entity
+                    n += 1
+
+    def update(self):
+        if self.focused_index != self.previously_focused_index:
+            self.focusable_widgets[self.previously_focused_index].model.setColorScale(self.focusable_widgets[self.previously_focused_index].color) # reset previous focus
+
+            try:
+                self.focusable_widgets[self.focused_index].model.setColorScale(self.focusable_widgets[self.focused_index].highlight_color) # create new focus
+                self.previously_focused_index = self.focused_index # keep previous focused index
+            except:
+                pass
+
+    def input(self, key):
+        if key == "gamepad dpad down" or key == "gamepad dpad right":
+            self.focused_index += 1
+            if self.focused_index > len(self.focusable_widgets) - 1:
+                self.focused_index = 0
+                
+        elif key == "gamepad dpad up" or key == "gamepad dpad left":
+            self.focused_index -= 1
+            if self.focused_index < 0:
+                self.focused_index = len(self.focusable_widgets) - 1
+
+        elif key == "gamepad a":
+            if self.focused_index < 0:
+                self.focused_index = 0
+
+            focused_widget = self.focusable_widgets[self.focused_index]
+
+            focused_widget.model.setColorScale(focused_widget.pressed_color)
+            focused_widget.model.setScale(Vec3(focused_widget.pressed_scale, focused_widget.pressed_scale, 1))
+            if focused_widget.pressed_sound:
+                if isinstance(focused_widget.pressed_sound, Audio):
+                    focused_widget.pressed_sound.play()
+                elif isinstance(focused_widget.pressed_sound, str):
+                    Audio(focused_widget.pressed_sound, auto_destroy=True)
+            
+            if isinstance(focused_widget, Dropdown):
+                if not focused_widget.buttons[0].enabled:
+                    focused_widget.open()
+                else:
+                    focused_widget.close()
+
+            elif self.focused_index in self.button_group_buttons:
+                button_group = self.button_group_buttons[self.focused_index]
+                button_group.select(self.focusable_widgets[self.focused_index])
+            else:
+                if focused_widget.on_click:
+                    focused_widget.on_click()
+
+        elif key == "gamepad a up":
+            if self.focused_index < 0:
+                self.focused_index = 0
+
+            focused_widget = self.focusable_widgets[self.focused_index]
+            
+            focused_widget.model.setColorScale(focused_widget.highlight_color)
+            focused_widget.model.setScale(Vec3(focused_widget.highlight_scale, focused_widget.highlight_scale, 1))
+
+    def hide(self):
+        for entity in self.ui:
+            destroy(entity)
+        
+        self.ui.clear()
+
+        destroy(self.main)
+
 class FixedFirstPersonController(FirstPersonController):
     def update(self):
         self.rotation_y += mouse.velocity[0] * self.mouse_sensitivity[1]

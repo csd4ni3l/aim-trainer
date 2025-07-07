@@ -1,17 +1,14 @@
 from ursina import *
+
 import pypresence, asyncio, json
-from utils.utils import FakePyPresence
+
+from utils.utils import FakePyPresence, MenuButton, FocusView
 from utils.constants import discord_presence_id
 
-class MenuButton(Button):
-    def __init__(self, text='', **kwargs):
-        super().__init__(text, scale=(.25, .075), highlight_color=color.azure, **kwargs)
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-
-class Main():
+class Main(FocusView):
     def __init__(self, pypresence_client=None) -> None:
+        super().__init__(y=.15)
+
         self.pypresence_client = pypresence_client
 
         with open("settings.json", "r") as file:
@@ -55,15 +52,17 @@ class Main():
         self.pypresence_client.update(state='In Main Menu', details='In Main Menu')
 
         button_spacing = .075 * 1.25
-    
-        self.menu_parent = Entity(parent=camera.ui, y=.15)
-        self.main_menu = Entity(parent=self.menu_parent)
 
-        self.title_label = Text("Aim Trainer", parent=self.main_menu, y=-0.01 * button_spacing, scale=3, x=-.2)
-        self.high_score_label = Text(f"High Score: {self.high_score}", parent=self.main_menu, scale=1.25, y=-1 * button_spacing, x=-.12)
-        self.play_button = MenuButton('Play', on_click=Func(self.play), parent=self.main_menu, y=-2 * button_spacing)
-        self.settings_button = MenuButton('Settings', on_click=Func(self.settings), parent=self.main_menu, y=-3 * button_spacing)
-        self.quit_button = MenuButton('Quit', on_click=Sequence(Wait(.01), Func(application.quit)), parent=self.main_menu, y=-4 * button_spacing)
+        self.title_label = Text("Aim Trainer", parent=self.main, y=-0.01 * button_spacing, scale=3, x=-.2)
+        self.high_score_label = Text(f"High Score: {self.high_score}", parent=self.main, scale=1.25, y=-1 * button_spacing, x=-.12)
+        
+        self.play_button = MenuButton('Play', on_click=Func(self.play), parent=self.main, y=-2 * button_spacing)
+        self.settings_button = MenuButton('Settings', on_click=Func(self.settings), parent=self.main, y=-3 * button_spacing)
+        self.quit_button = MenuButton('Quit', on_click=Sequence(Wait(.01), Func(application.quit)), parent=self.main, y=-4 * button_spacing)
+
+        self.ui = [self.title_label, self.high_score_label, self.play_button, self.settings_button, self.quit_button]
+
+        self.detect_focusable_widgets()
 
     def play(self):
         self.hide()
@@ -74,10 +73,3 @@ class Main():
         self.hide()
         from menus.settings import Settings
         Settings(self.pypresence_client)
-
-    def hide(self):
-        destroy(self.play_button)
-        destroy(self.settings_button)
-        destroy(self.quit_button)
-        destroy(self.main_menu)
-        destroy(self.menu_parent)
