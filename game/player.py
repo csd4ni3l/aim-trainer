@@ -70,7 +70,6 @@ class Player(FixedFirstPersonController):
             self.gun.texture = Texture(Path(self.settings_dict.get("weapons", weapons)[weapon_name]["image"]))
             self.weapon_attack_speed = self.settings_dict.get("weapons", weapons)[weapon_name]["atk_speed"]
             self.weapon_dmg = self.settings_dict.get("weapons", weapons)[weapon_name]["dmg"]
-
             if self.score > self.high_score:
                 self.high_score = self.score
 

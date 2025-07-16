@@ -2,7 +2,7 @@ from game.inventory import Inventory
 from game.player import Player
 from game.enemy import Enemy
 
-from utils.constants import min_enemy_y, max_enemy_y, enemies
+from utils.constants import min_enemy_y, max_enemy_y, enemies, weapons
 
 from ursina import *
 from ursina.shaders import lit_with_shadows_shader
@@ -33,10 +33,10 @@ class Game():
 
         self.ground = Entity(model='plane', collider='box', scale=64, texture='grass', texture_scale=(4,4), shader=lit_with_shadows_shader)
         self.info_label = Text("Score: 0 Hits: 0/0 Accuracy: 0%", parent=camera.ui, position=(-0.1 if self.game_mode == "training" else -0.4, 0.475))
-        self.inventory = Inventory(slots=len(self.settings_dict.get("weapons")))
+        self.inventory = Inventory(slots=len(self.settings_dict.get("weapons", weapons)))
 
-        for n, weapon in enumerate(self.settings_dict.get("weapons")):
-            self.inventory.append(self.settings_dict.get("weapons")[weapon]["image"], weapon, n)
+        for n, weapon in enumerate(self.settings_dict.get("weapons", weapons)):
+            self.inventory.append(self.settings_dict.get("weapons", weapons)[weapon]["image"], weapon, n)
 
         self.player = Player(self.game_mode, self.settings_dict, self.high_score, self.info_label, self.inventory, pypresence_client)
         self.player.summon_enemy = self.summon_enemy
