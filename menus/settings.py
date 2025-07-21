@@ -3,18 +3,18 @@ from ursina.prefabs.slider import ThinSlider
 from ursina.prefabs.dropdown_menu import DropdownMenuButton
 from ursina.prefabs.button_group import ButtonGroup
 
-import pypresence, json, copy
+import pypresence, json, copy, asyncio
 
 from utils.utils import FakePyPresence, Dropdown, FileManager, FocusView, is_float
 from utils.constants import discord_presence_id, settings, settings_start_category
 from utils.preload import music_sound
 
 class Settings(FocusView):
-    def __init__(self, rpc):
+    def __init__(self, pypresence_client):
         super().__init__(model='cube', color=color.dark_gray, scale=(1.8, 1.2), z=1)
 
-        self.rpc = rpc
-        rpc.update(state='In Settings', details='Modifying Settings', start=rpc.start_time)
+        self.pypresence_client = pypresence_client
+        pypresence_client.update(state='In Settings', details='Modifying Settings', start=pypresence_client.start_time)
 
         self.data = json.load(open('settings.json'))
         self.edits = {}
@@ -148,20 +148,27 @@ class Settings(FocusView):
 
         window.vsync = self.data['vsync']
 
-        if self.data['discord_rpc']:
-            if isinstance(self.rpc, FakePyPresence):
-                start = copy.deepcopy(self.rpc.start_time)
-                self.rpc.close()
-                self.rpc = pypresence.Presence(discord_presence_id)
-                self.rpc.connect()
-                self.rpc.update(state='In Settings', details='Modifying Settings', start=start)
-                self.rpc.start_time = start
+        if self.settings_dict['discord_pypresence_client']:
+            if isinstance(self.pypresence_client, FakePyPresence): # the user has enabled pypresence_client in the settings in this session.
+                start_time = copy.deepcopy(self.pypresence_client.start_time)
+                self.pypresence_client.close()
+                del self.pypresence_client
+                try:
+                    self.pypresence_client = pypresence.Presence(discord_presence_id)
+                    self.pypresence_client.connect()
+                    self.pypresence_client.update(state='In Settings', details='Modifying Settings', start=start_time)
+                    self.pypresence_client.start_time = start_time
+                except:
+                    self.pypresence_client = FakePyPresence()
+                    self.pypresence_client.start_time = start_time
         else:
-            if not isinstance(self.rpc, FakePyPresence):
-                start = copy.deepcopy(self.rpc.start_time)
-                self.rpc.close()
-                self.rpc = FakePyPresence()
-                self.rpc.start_time = start
+            if not isinstance(self.pypresence_client, FakePyPresence):
+                start_time = copy.deepcopy(self.pypresence_client.start_time)
+                self.pypresence_client.update()
+                self.pypresence_client.close()
+                del self.pypresence_client
+                self.pypresence_client = FakePyPresence()
+                self.pypresence_client.start_time = start_time
 
         if self.data['music']:
             if not music_sound.playing:
@@ -187,7 +194,7 @@ class Settings(FocusView):
         json.dump(self.data, open('settings.json', 'w'), indent=4)
 
         self.hide()
-        self.__init__(self.rpc)
+        self.__init__(self.pypresence_client)
 
     def add_enemy(self):
         name, speed, size, image = self.new_enemy_name_input.text, self.enemy_speed_inputs["New"].text, self.enemy_size_inputs["New"].text, self.enemy_img_paths["New"]
@@ -318,7 +325,7 @@ class Settings(FocusView):
     def exit(self):
         self.hide()
         from menus.main import Main
-        Main(pypresence_client=self.rpc)
+        Main(pypresence_client=self.pypresence_client)
 
     def credits(self):
         if hasattr(self, 'apply_button'):
