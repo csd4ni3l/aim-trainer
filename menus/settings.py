@@ -148,7 +148,7 @@ class Settings(FocusView):
 
         window.vsync = self.data['vsync']
 
-        if self.settings_dict['discord_pypresence_client']:
+        if self.data['discord_rpc']:
             if isinstance(self.pypresence_client, FakePyPresence): # the user has enabled pypresence_client in the settings in this session.
                 start_time = copy.deepcopy(self.pypresence_client.start_time)
                 self.pypresence_client.close()
