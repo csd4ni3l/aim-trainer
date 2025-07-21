@@ -1,6 +1,6 @@
 from ursina import *
 
-import pypresence, asyncio, json
+import pypresence, asyncio, json, copy
 
 from utils.utils import FakePyPresence, MenuButton, FocusView
 from utils.constants import discord_presence_id
