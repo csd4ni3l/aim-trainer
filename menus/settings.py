@@ -3,7 +3,7 @@ from ursina.prefabs.slider import ThinSlider
 from ursina.prefabs.dropdown_menu import DropdownMenuButton
 from ursina.prefabs.button_group import ButtonGroup
 
-import pypresence, json, copy, asyncio
+import pypresence, json, copy, asyncio, os
 
 from utils.utils import FakePyPresence, Dropdown, FileManager, FocusView, is_float
 from utils.constants import discord_presence_id, settings, settings_start_category
@@ -339,7 +339,7 @@ class Settings(FocusView):
                 destroy(e)
                 self.ui.remove(e)
 
-        with open('CREDITS', 'r') as file:
+        with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'CREDITS'), 'r') as file:
             text = file.read()
 
         if window.size.x >= 3840:

@@ -3,11 +3,10 @@ from game.player import Player
 from game.enemy import Enemy
 
 from utils.constants import min_enemy_y, max_enemy_y, enemies, weapons
+from utils.paths import resolve_asset
 
 from ursina import *
 from ursina.shaders import lit_with_shadows_shader
-
-from pathlib import Path
 
 import os, json
 
@@ -74,7 +73,7 @@ class Game():
                 self.player.x + (random.randint(12, 24) * random.choice([1, -1])),
                 random.randint(min_enemy_y, max_enemy_y),
                 self.player.z + (random.randint(12, 24) * random.choice([1, -1])),
-                Texture(Path(image_path))
+                Texture(resolve_asset(image_path))
             )
         )
 

@@ -5,10 +5,10 @@ from ursina.prefabs.ursfx import ursfx
 
 from utils.preload import death_sound
 from utils.constants import weapons
+from utils.paths import resolve_asset
 from utils.utils import FixedFirstPersonController
 
 import json
-from pathlib import Path
 
 class Player(FixedFirstPersonController):
     def __init__(self, game_mode, settings_dict, high_score, info_label, inventory, pypresence_client) -> None:
@@ -39,7 +39,7 @@ class Player(FixedFirstPersonController):
         self.weapon_attack_speed = 0
         self.weapon_dmg = 0
 
-        self.gun = Entity(model='cube', texture=Texture(Path(self.settings_dict.get("weapons", weapons)[self.inventory.slot_names[self.inventory.current_slot]]["image"])), parent=camera, position=(.5,-.25,.25), scale=(.3,.2,1), origin_z=-.5, on_cooldown=True, shader=lit_with_shadows_shader)
+        self.gun = Entity(model='cube', texture=Texture(resolve_asset(self.settings_dict.get("weapons", weapons)[self.inventory.slot_names[self.inventory.current_slot]]["image"])), parent=camera, position=(.5,-.25,.25), scale=(.3,.2,1), origin_z=-.5, on_cooldown=True, shader=lit_with_shadows_shader)
         invoke(setattr, self.gun, 'on_cooldown', False, delay=1)
         self.gun.muzzle_flash = Entity(parent=self.gun, z=1, world_scale=.5, model='quad', color=color.yellow, enabled=False, shader=lit_with_shadows_shader)
 
@@ -67,7 +67,7 @@ class Player(FixedFirstPersonController):
             self.info_label.text = info_text
 
             weapon_name = self.inventory.slot_names[self.inventory.current_slot]
-            self.gun.texture = Texture(Path(self.settings_dict.get("weapons", weapons)[weapon_name]["image"]))
+            self.gun.texture = Texture(resolve_asset(self.settings_dict.get("weapons", weapons)[weapon_name]["image"]))
             self.weapon_attack_speed = self.settings_dict.get("weapons", weapons)[weapon_name]["atk_speed"]
             self.weapon_dmg = self.settings_dict.get("weapons", weapons)[weapon_name]["dmg"]
             if self.score > self.high_score:
