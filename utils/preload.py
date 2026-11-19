@@ -1,6 +1,9 @@
-from ursina import Audio
+from ursina import Audio, application
 
-from utils.paths import resolve_asset
+from utils.paths import BASE_DIR
 
-music_sound = Audio(resolve_asset("assets/sound/music.mp3"), autoplay=False)
-death_sound = Audio(resolve_asset("assets/sound/death.wav"), autoplay=False)
+# Point Ursina's asset lookup at the bundled assets instead of the exe directory.
+application.asset_folder = BASE_DIR
+
+music_sound = Audio("assets/sound/music.mp3", autoplay=False)
+death_sound = Audio("assets/sound/death.wav", autoplay=False)
